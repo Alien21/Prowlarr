@@ -10,6 +10,7 @@ using NzbDrone.Core.Annotations;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Indexers.Settings;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.IndexerVersions;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.ThingiProvider;
@@ -20,16 +21,10 @@ namespace NzbDrone.Core.Indexers.Definitions
     public class ShowRSS : TorrentIndexerBase<NoAuthTorrentBaseSettings>
     {
         public override string Name => "ShowRSS";
-        public override string[] IndexerUrls => new string[] { "https://showrss.info/" };
-        public override string Language => "en-US";
-        public override string Description => "showRSS is a service that allows you to keep track of your favorite TV shows";
-        public override Encoding Encoding => Encoding.UTF8;
         public override DownloadProtocol Protocol => DownloadProtocol.Torrent;
-        public override IndexerPrivacy Privacy => IndexerPrivacy.Public;
-        public override IndexerCapabilities Capabilities => SetCapabilities();
 
-        public ShowRSS(IIndexerHttpClient httpClient, IEventAggregator eventAggregator, IIndexerStatusService indexerStatusService, IConfigService configService, Logger logger)
-            : base(httpClient, eventAggregator, indexerStatusService, configService, logger)
+        public ShowRSS(IIndexerHttpClient httpClient, IEventAggregator eventAggregator, IIndexerStatusService indexerStatusService, IIndexerDefinitionUpdateService definitionService, IConfigService configService, Logger logger)
+            : base(httpClient, eventAggregator, indexerStatusService, definitionService, configService, logger)
         {
         }
 
@@ -41,23 +36,6 @@ namespace NzbDrone.Core.Indexers.Definitions
         public override IParseIndexerResponse GetParser()
         {
             return new ShowRSSParser(Settings);
-        }
-
-        private IndexerCapabilities SetCapabilities()
-        {
-            var caps = new IndexerCapabilities
-            {
-                TvSearchParams = new List<TvSearchParam>
-                                   {
-                                       TvSearchParam.Q, TvSearchParam.Season, TvSearchParam.Ep
-                                   }
-            };
-
-            caps.Categories.AddCategoryMapping(1, NewznabStandardCategory.TV);
-            caps.Categories.AddCategoryMapping(2, NewznabStandardCategory.TVSD);
-            caps.Categories.AddCategoryMapping(3, NewznabStandardCategory.TVHD);
-
-            return caps;
         }
     }
 
